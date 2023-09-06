@@ -10,18 +10,37 @@ const { Pool, Client } = pkg;
 // })
  
 // console.log(await pool.query('SELECT NOW()'))
+
+class PostgreSQLConnection {
+
+    connect() {
+        this.client = new Client({
+            user: 'postgres',
+            host: 'localhost',
+            database: 'postgres',
+            password: 'admin',
+            port: 5432,
+        })
+        this.client.connect();
+    }
+
+    getConnection() {
+        return this.client;
+    }
+}
+
+const db = new PostgreSQLConnection();
+await db.connect();
+const client = db.getConnection();
  
-const client = new Client({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'postgres',
-    password: 'admin',
-    port: 5432,
-})
- 
-await client.connect()
-const resp = await client.query('SELECT * FROM users');
-const rows = resp.rows;
-console.log(rows)
- 
-await client.end()
+
+try {
+    const res = await client.query(query);
+    console.log('Table is successfully created');
+} catch (err) {
+    console.log(err.stack);
+} finally {
+    client.close();
+}
+
+// https://www.digitalocean.com/community/tutorials/how-to-use-postgresql-with-node-js-on-ubuntu-20-04
